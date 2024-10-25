@@ -1,5 +1,14 @@
 package example.dailysky_project.service;
 
+import example.dailysky_project.domain.Diary;
+import example.dailysky_project.repository.DiaryRepository;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -8,6 +17,9 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
+
 
 @Service
 public class DiaryService {
@@ -15,16 +27,31 @@ public class DiaryService {
     @Value("${openweathermap.key}")
     private String apiKey;
 
+    private final DiaryRepository diaryRepository;
+
+    public DiaryService(DiaryRepository diaryRepository) {
+        this.diaryRepository = diaryRepository;
+    }
+
     public void createDiary(LocalDate date, String text) {
         // open weather map 에서 날씨 데이터 가져오기
         String weatherData = getWeatherString();
 
         // 받아온 날씨 json 파싱
+        Map<String, Object> parseWeather = parseWeather(weatherData);
 
         // 파싱된 데이터 + 일기 값 DB에 넣기
+        Diary nowDiary =  new Diary();
+        nowDiary.setWeather(parseWeather.get("main").toString());
+        nowDiary.setIcon(parseWeather.get("icon").toString());
+        nowDiary.setTemperature((Double) parseWeather.get("temp"));
+        nowDiary.setText(text);
+        nowDiary.setDate(date);
+
+        diaryRepository.save(nowDiary);
     }
 
-    private String getWeatherString(){
+    private String getWeatherString() {
         String apiUrl = "https://api.openweathermap.org/data/2.5/weather?q=seoul&appid=" + apiKey;
 
         try {
@@ -49,5 +76,28 @@ public class DiaryService {
         } catch (Exception e) {
             return "failed to get response";
         }
+    }
+
+    private Map<String, Object> parseWeather(String jsonString) {
+        JSONParser jsonParser = new JSONParser();
+        JSONObject jsonObject;
+
+        try {
+            jsonObject = (JSONObject) jsonParser.parse(jsonString);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+
+        Map<String, Object> resultMap = new HashMap<>();
+
+        JSONObject mainData = (JSONObject) jsonObject.get("main");
+        resultMap.put("temp", mainData.get("temp"));
+
+        JSONArray weatherArray = (JSONArray) jsonObject.get("weather");
+        JSONObject weatherData = (JSONObject) weatherArray.get(0);
+        resultMap.put("main", weatherData.get("main"));
+        resultMap.put("icon", weatherData.get("icon"));
+
+        return resultMap;
     }
 }
