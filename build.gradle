@@ -21,14 +21,23 @@ configurations {
 
 repositories {
     mavenCentral()
+
 }
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'com.googlecode.json-simple:json-simple:1.1.1'
+
+    implementation 'mysql:mysql-connector-java:8.0.32'  // MySQL Connector/J의 올바른 버전 추가
+
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    runtimeOnly 'mysql:mysql-connector-java'
 }
 
 tasks.named('test') {
