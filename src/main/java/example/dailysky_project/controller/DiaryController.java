@@ -2,6 +2,9 @@ package example.dailysky_project.controller;
 
 import example.dailysky_project.domain.Diary;
 import example.dailysky_project.service.DiaryService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
@@ -15,8 +18,11 @@ public class DiaryController {
 
     private final DiaryService diaryService;
 
+    @Operation(summary = "일기 텍스트와 날씨를 이용해 DB에 일기 저장", description = "이하동일")
     @PostMapping("/create/diary")
-    void createDiary(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date, @RequestBody String text) {
+    void createDiary(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+                     @Parameter(description = "날짜 입력", example = "2024-10-27") LocalDate date,
+                     @RequestBody String text) {
         diaryService.createDiary(date, text);
     }
 

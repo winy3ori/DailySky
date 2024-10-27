@@ -2,6 +2,7 @@ package example.dailysky_project.service;
 
 import example.dailysky_project.domain.DateWeather;
 import example.dailysky_project.domain.Diary;
+import example.dailysky_project.error.InvalidDate;
 import example.dailysky_project.repository.DateWeatherRepository;
 import example.dailysky_project.repository.DiaryRepository;
 import org.json.simple.JSONArray;
@@ -87,6 +88,9 @@ public class DiaryService {
 
     @Transactional(readOnly = true)
     public List<Diary> readDiary(LocalDate date) {
+//        if (date.isAfter(LocalDate.ofYearDay(3050, 1))) {
+//            throw new InvalidDate();
+//        }
         return diaryRepository.findAllByDate(date);
     }
 
